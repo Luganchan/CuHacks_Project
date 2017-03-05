@@ -1,44 +1,49 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+var device_names = [];
 
-class App extends Component {
-  render() {
-    const  test_obj =  {
-      "0": "/devices/0/",
-      "1": "/devices/1/",
-      "10": "/devices/10/",
-      "11": "/devices/11/",
-      "12": "/devices/12/",
-      "13": "/devices/13/",
-      "2": "/devices/2/",
-      "3": "/devices/3/",
-      "4": "/devices/4/",
-      "5": "/devices/5/",
-      "6": "/devices/6/",
-      "7": "/devices/7/",
-      "8": "/devices/8/",
-      "9": "/devices/9/"
-    }
+class List extends Component {
 
-    fetch("http://cuhackathon-challenge.martellotech.com").then(result =>
-      result.json()
+  constructor(props){
+    super(props);
+    this.state = {devices: false}
+  }
 
-    ).then(() => {
-
-    const route_values = Object.values(test_obj)
-    const promise_array = route_values.map(route => (
-      fetch("http://cuhackathon-challenge.martellotech.com" + route)
-    ))
-    return Promise.all(promise_array)
+  componentDidMount(){
+  fetch("http://cuhackathon-challenge.martellotech.com/devices/").then(result => {
+    console.log(result)
+    return result.json()
+  }
+  ).then((test_obj) => {
+    console.log("teststring")
+  const route_values = Object.values(test_obj)
+  const promise_array = route_values.map(route => (
+    fetch("http://cuhackathon-challenge.martellotech.com" + route)
+  ))
+  return Promise.all(promise_array)
   })
-      .then((results) => (
-        Promise.all(results.map((result) => result.json()))
-      ))
-      .then(results => {
-        results.forEach(result => console.log(result.name))
-      })
+    .then((results) => (
+      Promise.all(results.map((result) => result.json()))
+    ))
+    .then(results => {
+      this.setState({devices: results})
+      results.forEach(result => device_names.push(result.name));
+    })
+    .catch(console.error)
+  }
+
+  render() {
+    if (this.state.devices == false){return(
+      <div>
+        <h3>DEVICES</h3>
+      </div>
+    )}else{
+        <div>
+        {this.state.devices.map((device, i) => (<Button key={i} title={device.name} onPress="alert('You have selected: + device.name')"/>))}
+        </div>
+    }
   }
 }
 
-export default App;
+export default List;
